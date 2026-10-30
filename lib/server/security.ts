@@ -11,6 +11,11 @@ function secret(): string | null {
   return s && s.length >= 32 ? s : null;
 }
 
+/** The dashboard is open unless ADMIN_PASSWORD is set. */
+export function isPasswordRequired(): boolean {
+  return Boolean(process.env.ADMIN_PASSWORD);
+}
+
 export function isAdminConfigured(): boolean {
   return Boolean(process.env.ADMIN_PASSWORD && secret());
 }
@@ -67,6 +72,7 @@ export function verifySessionValue(value: string | undefined | null): boolean {
 }
 
 export function isAdminRequest(req: NextRequest): boolean {
+  if (!isPasswordRequired()) return true;
   return verifySessionValue(req.cookies.get(ADMIN_COOKIE)?.value);
 }
 

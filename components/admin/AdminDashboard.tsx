@@ -21,7 +21,7 @@ const dateFmt = new Intl.DateTimeFormat("en-GB", {
   minute: "2-digit",
 });
 
-export default function AdminDashboard({ databaseConfigured }: { databaseConfigured: boolean }) {
+export default function AdminDashboard({ databaseConfigured, canSignOut }: { databaseConfigured: boolean; canSignOut: boolean }) {
   const router = useRouter();
   const [rsvps, setRsvps] = useState<Rsvp[]>([]);
   const [loading, setLoading] = useState(true);
@@ -111,9 +111,11 @@ export default function AdminDashboard({ databaseConfigured }: { databaseConfigu
           <a href="/" className="admin-btn admin-btn--ghost">
             View invitation
           </a>
-          <button type="button" className="admin-btn admin-btn--ghost" onClick={logout}>
-            Sign out
-          </button>
+          {canSignOut && (
+            <button type="button" className="admin-btn admin-btn--ghost" onClick={logout}>
+              Sign out
+            </button>
+          )}
         </div>
       </header>
 
