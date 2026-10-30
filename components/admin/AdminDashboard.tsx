@@ -31,6 +31,16 @@ export default function AdminDashboard({ databaseConfigured, canSignOut }: { dat
   const [editing, setEditing] = useState<Rsvp | null>(null);
   const [deleting, setDeleting] = useState<Rsvp | null>(null);
   const [toast, setToast] = useState<string | null>(null);
+  const [problems, setProblems] = useState<string[]>([]);
+
+  // When something's off, ask the server exactly what (env vars, key type, missing tables).
+  const diagnose = useCallback(async () => {
+    try {
+      const res = await fetch("/api/health", { cache: "no-store" });
+      const data = await res.json();
+      setProblems(Array.isArray(data.problems) ? data.problems : []);
+    } catch {}
+  }, []);
 
   const flash = (msg: string) => {
     setToast(msg);
@@ -59,15 +69,19 @@ export default function AdminDashboard({ databaseConfigured, canSignOut }: { dat
       setRsvps(data.rsvps);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Could not load RSVPs");
+      void diagnose();
     } finally {
       setLoading(false);
     }
-  }, [handleAuth]);
+  }, [handleAuth, diagnose]);
 
   useEffect(() => {
     if (databaseConfigured) void load();
-    else setLoading(false);
-  }, [databaseConfigured, load]);
+    else {
+      setLoading(false);
+      void diagnose();
+    }
+  }, [databaseConfigured, load, diagnose]);
 
   const counts = useMemo(() => {
     const c = { total: rsvps.length, yes: 0, no: 0, maybe: 0 };
@@ -173,6 +187,16 @@ export default function AdminDashboard({ databaseConfigured, canSignOut }: { dat
         <p className="admin-alert" role="alert">
           {error}
         </p>
+      )}
+      {problems.length > 0 && (
+        <div className="admin-alert" role="alert">
+          <strong>What needs fixing:</strong>
+          <ul className="admin-problems">
+            {problems.map((p) => (
+              <li key={p}>{p}</li>
+            ))}
+          </ul>
+        </div>
       )}
 
       {loading ? (

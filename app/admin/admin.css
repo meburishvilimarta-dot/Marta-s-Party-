@@ -483,3 +483,11 @@ textarea.admin-input {
     min-width: 90px;
   }
 }
+
+.admin-problems {
+  margin: 8px 0 0;
+  padding-left: 20px;
+}
+.admin-problems li + li {
+  margin-top: 4px;
+}
